@@ -1,4 +1,4 @@
-from .models import Block, Header, Body
+from .models import Block, Header, Body, Content
 from rest_framework import serializers
 
 class HeaderSerializer(serializers.ModelSerializer):
