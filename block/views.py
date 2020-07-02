@@ -23,11 +23,6 @@ def add_content(request):
 	if request.method == 'POST':
 		Content(content=request.data['content']).save()
 		return Response(None)
-	elif request.method == 'GET':
-		# Content.objects.filter(id=3).delete()
-		contents = Content.objects.all().order_by()
-		serializer = ContentSerializer(contents, many=True)
-		return Response(serializer.data)
 
 @api_view(['GET'])
 def mine(request):
