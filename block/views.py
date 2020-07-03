@@ -60,11 +60,15 @@ def mine(request):
             mine_id = int(request.data['id'])
             content = Content.objects.get(id = mine_id).content
             body = Body(content=content)
-            print(body.content)
-            prevblock = Block.objects.latest('id')
-            previous_hash = sha256(JSONRenderer().render(BlockSerializer(prevblock).data)).hexdigest()
-            block_number = prevblock.header.block_number+1
-            #prev_difficulty = prevblock.header.difficulty
+            #print(body.content)
+            prevblock, previous_hash, block_number = None, None, None
+            try:
+                prevblock = Block.objects.latest('id')
+                previous_hash = sha256(JSONRenderer().render(BlockSerializer(prevblock).data)).hexdigest()
+                block_number = prevblock.header.block_number+1
+            except:
+                previous_hash = '0'*64
+                block_number = 1
             header = Header(block_number=block_number, previous_hash=previous_hash, nonce=None, difficulty=2**desired_diff)
             target = int(hash_max/(2**desired_diff))
             nonce = 0
@@ -93,10 +97,14 @@ def add_block(request):
         try:
             add_id = int(request.data['id'])
             nonce = int(request.data['nonce'])
-            prevblock = Block.objects.latest('id')
-            previous_hash = sha256(JSONRenderer().render(BlockSerializer(prevblock).data)).hexdigest()
-            block_number = prevblock.header.block_number+1
-            #prev_difficulty = prevblock.header.difficulty
+            prevblock, previous_hash, block_number = None, None, None
+            try:
+                prevblock = Block.objects.latest('id')
+                previous_hash = sha256(JSONRenderer().render(BlockSerializer(prevblock).data)).hexdigest()
+                block_number = prevblock.header.block_number+1
+            except:
+                previous_hash = '0'*64
+                block_number = 1
             target = int(hash_max/(2**desired_diff))
             header = Header(block_number=block_number, previous_hash=previous_hash, nonce=nonce, difficulty=2**desired_diff)
             body = Body(content=Content.objects.get(id = add_id).content)
@@ -114,4 +122,3 @@ def add_block(request):
             return Response({"error": "Invalid Nonce"}, status = status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"error": "Invalid ID/Nonce"}, status = status.HTTP_400_BAD_REQUEST)
-
