@@ -18,4 +18,7 @@ from django.urls import path
 from .views import *
 urlpatterns = [
     path('', block_list, name = 'block-list'),
+    path('content', add_content, name = 'add-content'),
+    path('mine', mine, name = 'mine'),
+    path('add', add_block, name = 'add-block')
 ]
