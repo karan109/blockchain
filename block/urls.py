@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import *
+from .views import block_list, add_block, add_content, mine
 urlpatterns = [
     path('', block_list, name = 'block-list'),
     path('content', add_content, name = 'add-content'),

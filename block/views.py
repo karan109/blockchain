@@ -1,14 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from rest_framework.parsers import JSONParser
+#from django.http import HttpResponse
+#from rest_framework.parsers import JSONParser
 from .models import Body, Header, Content, Block
 from .serializers import BodySerializer, HeaderSerializer, ContentSerializer, BlockSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from .models import *
 from hashlib import sha256
-from random import randint
+#from random import randint
 from rest_framework import status
 import requests
 from django.urls import reverse
