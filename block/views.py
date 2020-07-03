@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.parsers import JSONParser
-from .models import *
-from .serializers import *
+from .models import Body, Header, Content, Block
+from .serializers import BodySerializer, HeaderSerializer, ContentSerializer, BlockSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
@@ -16,7 +16,7 @@ from django.urls import reverse
 hash_max = 2**256-1
 #desired_diff = 
 desired_diff = 8
-link = 'http://localhost:8000/'
+link = 'http://localhost:8000'
 
 @api_view(['GET', 'POST'])
 def block_list(request):
@@ -25,7 +25,15 @@ def block_list(request):
         serializer = BlockSerializer(blocks, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
-        return Response(None)
+        try:
+            content = request.data['content']
+            content_response = requests.post(link+reverse('add-content'), json = {"content": content})
+            mine_response = requests.post(link+reverse('mine'), json = content_response.json())
+            add_response = requests.post(link+reverse('add-block'), json = mine_response.json())
+            return Response(add_response.json(), status = status.HTTP_201_CREATED)
+        except:
+            return Response({"error": "Content not found"}, status = status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'POST'])
 def add_content(request):
