@@ -9,16 +9,22 @@ from rest_framework.renderers import JSONRenderer
 from .models import *
 from hashlib import sha256
 from random import randint
-nonce_max = 2**32-1
 
-@api_view(['GET'])
+nonce_max = 2**32-1
+hash_max = 2**256-1
+desired_diff = 1000
+
+@api_view(['GET', 'POST'])
 def block_list(request):
 	if request.method == 'GET':
 		blocks = Block.objects.all().order_by()
 		serializer = BlockSerializer(blocks, many=True)
 		return Response(serializer.data)
+	elif request.method == 'POST':
+		# fill for direct addition of block
+		return Response(None)
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def add_content(request):
 	if request.method == 'POST':
 		Content(content=request.data['content']).save()
@@ -34,17 +40,13 @@ def mine(request):
 		previous_hash = sha256(JSONRenderer().render(BlockSerializer(prevblock).data)).hexdigest()
 		block_number = prevblock.header.block_number+1
 		prev_difficulty = prevblock.header.difficulty
-		header = Header(block_number=block_number, previous_hash=previous_hash, nonce=None, difficulty=2)
-		target = ''
-		for i in range(prev_difficulty):
-			target += '0'
-		for i in range(64-prev_difficulty):
-			target += 'f'
+		header = Header(block_number=block_number, previous_hash=previous_hash, nonce=None, difficulty=desired_diff)
+		target = int(hash_max/prev_difficulty)
 		while True:
 			nonce = randint(0, nonce_max)
 			header.nonce = nonce
 			block = Block(header=header, body=body)
-			block_hash = sha256(JSONRenderer().render(BlockSerializer(block).data)).hexdigest()
+			block_hash = int(sha256(JSONRenderer().render(BlockSerializer(block).data)).hexdigest(), 16)
 			if(block_hash<=target):
 				break
 		return Response(f'Nonce: {nonce}')
@@ -58,15 +60,11 @@ def add_block(request):
 	previous_hash = sha256(JSONRenderer().render(BlockSerializer(prevblock).data)).hexdigest()
 	block_number = prevblock.header.block_number+1
 	prev_difficulty = prevblock.header.difficulty
-	target = ''
-	for i in range(prev_difficulty):
-		target += '0'
-	for i in range(64-prev_difficulty):
-		target += 'f'
-	header = Header(block_number=block_number, previous_hash=previous_hash, nonce=nonce, difficulty=2)
+	target = int(hash_max/prev_difficulty)
+	header = Header(block_number=block_number, previous_hash=previous_hash, nonce=nonce, difficulty=desired_diff)
 	body = Body(content=Content.objects.latest('id').content)
 	block = Block(header=header, body=body)
-	block_hash = sha256(JSONRenderer().render(BlockSerializer(block).data)).hexdigest()
+	block_hash = int(sha256(JSONRenderer().render(BlockSerializer(block).data)).hexdigest(), 16)
 	if(block_hash<=target):
 		header.save()
 		body.save()
