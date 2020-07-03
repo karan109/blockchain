@@ -10,7 +10,6 @@ class Header(models.Model):
 class Body(models.Model):
     content = models.TextField(default = 'a')
 
-
 class Block(models.Model):
     header = models.ForeignKey(Header, on_delete = models.CASCADE)
     body = models.ForeignKey(Body, on_delete = models.CASCADE)

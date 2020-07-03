@@ -14,7 +14,7 @@ class BodySerializer(serializers.ModelSerializer):
 class ContentSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Content
-		fields = ('content',)
+		fields = ('id', 'content')
 	
 class BlockSerializer(serializers.ModelSerializer):
 	header = HeaderSerializer()
